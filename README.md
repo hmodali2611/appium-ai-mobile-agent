@@ -1,5 +1,8 @@
 # Appium AI Mobile Agent
 
+[![CI](https://github.com/hmodali2611/appium-ai-mobile-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/hmodali2611/appium-ai-mobile-agent/actions/workflows/ci.yml)
+[![Real Android emulator](https://github.com/hmodali2611/appium-ai-mobile-agent/actions/workflows/real-device.yml/badge.svg)](https://github.com/hmodali2611/appium-ai-mobile-agent/actions/workflows/real-device.yml)
+
 AI agents for **native Android and iOS testing** with Appium:
 
 1. **Self-healing locators.** When an app update renames an element id, the test finds the element again from a plain description ("Sign in button"), keeps running, and logs the broken locator so it gets fixed.
@@ -16,6 +19,19 @@ Goal reached: False (error screen) in 8 steps
 
 The agent found that checkout fails whenever a promo code is applied, and wrote the repro steps:
 [`examples/promo-checkout-defect.md`](examples/promo-checkout-defect.md). Without the promo code the same flow passes, and the agent generates [`examples/test_generated_flow.py`](examples/test_generated_flow.py).
+
+## Verified on a real Android emulator
+
+Every push boots an Android 11 emulator on GitHub Actions and runs the agents against Appium's public **ApiDemos** app ([results](examples/real-device/)):
+
+| Check | Result |
+| --- | --- |
+| Parse a real UiAutomator2 page source | passed |
+| Heal a broken locator (`id=…/views_menu` → `accessibility id=Views`) on the real app | passed ([heal log](examples/real-device/healing-report.jsonl)) |
+| Explore to a goal ("Open Views and then Buttons") | reached in 2 steps ([report](examples/real-device/exploration.md)) |
+| Replay the agent-generated regression test on the device | passed ([test](examples/real-device/test_generated_apidemos.py), [run](examples/real-device/generated-test-run.txt)) |
+
+The first real run caught a bug the simulator could not: Android renders button text in ALL CAPS, so the generated test's case-sensitive success check failed. Generated tests now match success text the way the agent does, ignoring case.
 
 ## How the exploratory agent works
 
