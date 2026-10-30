@@ -80,7 +80,7 @@ mobile-agent explore --app device --caps caps/android-emulator.json \
 APPIUM_SERVER=http://127.0.0.1:4723 pytest tests_device      # device tests are skipped otherwise
 ```
 
-CI runs the offline suite on every push. An optional job starts an Android emulator on GitHub Actions and runs `tests_device` (set the repo variable `RUN_EMULATOR=true`).
+CI runs the offline suite on every push. A second workflow, **Real Android emulator** (`.github/workflows/real-device.yml`), boots an Android 11 emulator on GitHub Actions, installs Appium's public [ApiDemos](https://github.com/appium/android-apidemos) app and runs `tests_device`: page-source parsing, a broken locator healing on the real app, and an exploration whose generated regression test is then replayed on the device. Reports are uploaded as build artifacts and copied into [`examples/real-device/`](examples/real-device/).
 
 ## Project layout
 

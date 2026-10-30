@@ -1,0 +1,12 @@
+{
+  "platformName": "Android",
+  "appium:automationName": "UiAutomator2",
+  "appium:deviceName": "Android Emulator",
+  "appium:app": "apps/ApiDemos-debug.apk",
+  "appium:appPackage": "io.appium.android.apis",
+  "appium:appActivity": ".ApiDemos",
+  "appium:autoGrantPermissions": true,
+  "appium:newCommandTimeout": 300,
+  "appium:uiautomator2ServerLaunchTimeout": 120000,
+  "appium:adbExecTimeout": 120000
+}

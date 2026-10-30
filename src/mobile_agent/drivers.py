@@ -75,6 +75,9 @@ class AppiumDevice:
         return self.driver.query_app_state(self.bundle) == 4  # 4 = running in foreground
 
     def quit(self) -> None:
+        if getattr(self, "_closed", False):
+            return
+        self._closed = True
         self.driver.quit()
 
 
