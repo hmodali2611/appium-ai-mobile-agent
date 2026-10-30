@@ -33,4 +33,5 @@ def test_sign_in_add_wireless_earbuds_to_the_cart_open_the_cart_and_c(driver):
     wait.until(EC.element_to_be_clickable((AppiumBy.ACCESSIBILITY_ID, 'Add Wireless Earbuds to cart'))).click()
     wait.until(EC.element_to_be_clickable((AppiumBy.ID, 'com.shoplite:id/open_cart'))).click()
     wait.until(EC.element_to_be_clickable((AppiumBy.ID, 'com.shoplite:id/checkout'))).click()
-    assert wait.until(EC.presence_of_element_located((AppiumBy.XPATH, "//*[contains(@text, 'Order placed') or contains(@label, 'Order placed')]")))
+    # same check the agent used: success text anywhere on screen, ignoring case (Android buttons are often ALL CAPS)
+    assert wait.until(lambda d: 'order placed' in d.page_source.lower())

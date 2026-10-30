@@ -250,5 +250,6 @@ def driver():
 def test_{slug}(driver):
     wait = WebDriverWait(driver, 15)
 {steps}
-    assert wait.until(EC.presence_of_element_located((AppiumBy.XPATH, "//*[contains(@text, {success_text!r}) or contains(@label, {success_text!r})]")))
+    # same check the agent used: success text anywhere on screen, ignoring case (Android buttons are often ALL CAPS)
+    assert wait.until(lambda d: {success_text.lower()!r} in d.page_source.lower())
 '''

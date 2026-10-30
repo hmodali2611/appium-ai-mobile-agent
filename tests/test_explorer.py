@@ -52,3 +52,9 @@ class ScriptedLLM:
 def test_invalid_model_decisions_are_ignored():
     report = explore(SimulatedShopLite(), GOAL_PLAIN, CREDS, "Order placed", llm=ScriptedLLM())
     assert report.steps == [] and report.stop_reason == "agent gave up: test"
+
+
+def test_generated_test_checks_success_text_case_insensitively():
+    report = explore(SimulatedShopLite(), GOAL_PLAIN, CREDS, "Order placed")
+    code = to_pytest(report, "Order placed", "caps/android-emulator.json")
+    assert "'order placed' in d.page_source.lower()" in code
