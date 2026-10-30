@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AppiumAUT>
+  <XCUIElementTypeApplication type="XCUIElementTypeApplication" name="ShopLite" label="ShopLite" enabled="true" visible="true" accessible="false" x="0" y="0" width="393" height="852">
+    <XCUIElementTypeWindow type="XCUIElementTypeWindow" enabled="true" visible="true" accessible="false" x="0" y="0" width="393" height="852">
+      <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="ShopLite" name="ShopLite" label="ShopLite" enabled="true" visible="true" accessible="true" x="20" y="100" width="353" height="40"/>
+      <XCUIElementTypeTextField type="XCUIElementTypeTextField" value="Email" name="emailField" label="" enabled="true" visible="true" accessible="true" x="20" y="200" width="353" height="44"/>
+      <XCUIElementTypeSecureTextField type="XCUIElementTypeSecureTextField" value="Password" name="passwordField" label="" enabled="true" visible="true" accessible="true" x="20" y="260" width="353" height="44"/>
+      <XCUIElementTypeButton type="XCUIElementTypeButton" name="signInButton" label="Sign in" enabled="true" visible="true" accessible="true" x="20" y="330" width="353" height="50"/>
+      <XCUIElementTypeButton type="XCUIElementTypeButton" name="" label="" enabled="true" visible="true" accessible="true" x="340" y="40" width="44" height="44"/>
+    </XCUIElementTypeWindow>
+  </XCUIElementTypeApplication>
+</AppiumAUT>

@@ -1,0 +1,26 @@
+[project]
+name = "appium-ai-mobile-agent"
+version = "1.0.0"
+description = "AI agents for native mobile testing with Appium: self-healing locators and a goal-driven exploratory agent for Android and iOS."
+authors = [{ name = "Harika Modali" }]
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = ["Appium-Python-Client>=4.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+mobile-agent = "mobile_agent.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+markers = ["device: needs a running Appium server and a real device or emulator"]
