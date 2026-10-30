@@ -28,14 +28,12 @@ jobs:
           npm install -g appium
           appium driver install uiautomator2
       - run: pip install -e ".[dev]"
-      - name: Download Appium's public ApiDemos app
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Download Appium's public ApiDemos app (npm package android-apidemos)
         run: |
           mkdir -p apps
-          gh release download -R appium/android-apidemos --pattern "*.apk" --dir apps
-          mv apps/*.apk apps/ApiDemos-debug.apk
-          ls -la apps
+          cd apps && npm pack android-apidemos --silent && tar xzf android-apidemos-*.tgz package/apks/ApiDemos-debug.apk
+          mv package/apks/ApiDemos-debug.apk . && rm -rf package android-apidemos-*.tgz
+          ls -la
       - name: Start Appium server
         run: |
           mkdir -p out/real-device
