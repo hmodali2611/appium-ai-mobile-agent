@@ -6,6 +6,9 @@ on:
   schedule:
     - cron: "0 9 * * 1"   # weekly, Monday 09:00 UTC
 
+permissions:
+  contents: write
+
 jobs:
   apidemos:
     runs-on: ubuntu-latest
@@ -46,9 +49,19 @@ jobs:
           target: default
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: APPIUM_SERVER=http://127.0.0.1:4723 python -m pytest tests_device -v -p no:cacheprovider
+          script: APPIUM_SERVER=http://127.0.0.1:4723 python -m pytest tests_device -v -p no:cacheprovider --junitxml=out/real-device/junit.xml -o junit_logging=all > out/real-device/pytest-output.txt 2>&1; rc=$?; cat out/real-device/pytest-output.txt; exit $rc
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: real-device-reports
           path: out/real-device/
+      - name: Publish reports to the real-device-reports branch
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          cd out/real-device
+          git init -q -b real-device-reports
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Real-device run ${{ github.run_id }} (${{ job.status }})"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" real-device-reports
