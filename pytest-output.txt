@@ -1,0 +1,12 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.2.0, pluggy-1.7.0 -- /opt/hostedtoolcache/Python/3.12.16/x64/bin/python
+rootdir: /home/runner/work/appium-ai-mobile-agent/appium-ai-mobile-agent
+configfile: pyproject.toml
+collecting ... collected 3 items
+
+tests_device/test_apidemos.py::test_page_source_parses_on_a_real_device PASSED [ 33%]
+tests_device/test_apidemos.py::test_broken_locator_heals_on_a_real_device PASSED [ 66%]
+tests_device/test_apidemos.py::test_exploration_reaches_goal_and_generated_test_replays PASSED [100%]
+
+- generated xml file: /home/runner/work/appium-ai-mobile-agent/appium-ai-mobile-agent/out/real-device/junit.xml -
+============================== 3 passed in 21.29s ==============================
