@@ -3,10 +3,28 @@
 [![CI](https://github.com/hmodali2611/appium-ai-mobile-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/hmodali2611/appium-ai-mobile-agent/actions/workflows/ci.yml)
 [![Real Android emulator](https://github.com/hmodali2611/appium-ai-mobile-agent/actions/workflows/real-device.yml/badge.svg)](https://github.com/hmodali2611/appium-ai-mobile-agent/actions/workflows/real-device.yml)
 
-AI agents for **native Android and iOS testing** with Appium:
+## What it is
 
-1. **Self-healing locators.** When an app update renames an element id, the test finds the element again from a plain description ("Sign in button"), keeps running, and logs the broken locator so it gets fixed.
-2. **Exploratory testing agent.** Give it a goal and test data. It works through the app screen by screen like a tester would, reports crashes, error screens and accessibility gaps with steps to reproduce, and turns a successful run into a plain Appium regression test.
+AI agents for native Android and iOS testing with Appium: self-healing locators and an exploratory testing agent.
+
+## Why it exists
+
+When an app update renames an element id, tests break for a reason that has nothing to do with the product. And exploratory testing takes a human tester working screen by screen. This agent finds elements again from a plain description, and it works through an app from a goal, reports what it finds with steps to reproduce, and turns a successful run into a plain Appium regression test.
+
+## Scope and limits
+
+In scope:
+
+- Self-healing locators: find an element again from a plain description when an id changes, keep running, and log the broken locator.
+- Exploratory testing agent: work through an app screen by screen from a goal and test data, report crashes, error screens and accessibility gaps with repro steps, and turn a successful run into a plain Appium regression test.
+- Verified on a real Android emulator against ApiDemos on every push.
+
+Out of scope: web Playwright generation, MCP serving, and requirements to test generation.
+
+## Features and how it works
+
+1. Self-healing locators. When an app update renames an element id, the test finds the element again from a plain description ("Sign in button"), keeps running, and logs the broken locator so it gets fixed.
+2. Exploratory testing agent. Give it a goal and test data. It works through the app screen by screen like a tester would, reports crashes, error screens and accessibility gaps with steps to reproduce, and turns a successful run into a plain Appium regression test.
 
 ```text
 $ mobile-agent explore --goal "Sign in, add Wireless Earbuds to the cart, open the cart, apply promo code SAVE20 and checkout" \
@@ -17,39 +35,36 @@ Goal reached: False (error screen) in 8 steps
   [High] ERROR_SCREEN: "Something went wrong. Please try again." shown
 ```
 
-The agent found that checkout fails whenever a promo code is applied, and wrote the repro steps:
-[`examples/promo-checkout-defect.md`](examples/promo-checkout-defect.md). Without the promo code the same flow passes, and the agent generates [`examples/test_generated_flow.py`](examples/test_generated_flow.py).
+The agent found that checkout fails whenever a promo code is applied, and wrote the repro steps: [`examples/promo-checkout-defect.md`](examples/promo-checkout-defect.md). Without the promo code the same flow passes, and the agent generates [`examples/test_generated_flow.py`](examples/test_generated_flow.py).
 
-## Verified on a real Android emulator
-
-Every push boots an Android 11 emulator on GitHub Actions and runs the agents against Appium's public **ApiDemos** app ([results](examples/real-device/)):
+Verified on a real Android emulator: every push boots an Android 11 emulator on GitHub Actions and runs the agents against Appium's public ApiDemos app ([results](examples/real-device/)):
 
 | Check | Result |
 | --- | --- |
 | Parse a real UiAutomator2 page source | passed |
-| Heal a broken locator (`id=…/views_menu` → `accessibility id=Views`) on the real app | passed ([heal log](examples/real-device/healing-report.jsonl)) |
+| Heal a broken locator (`id=…/views_menu` to `accessibility id=Views`) on the real app | passed ([heal log](examples/real-device/healing-report.jsonl)) |
 | Explore to a goal ("Open Views and then Buttons") | reached in 2 steps ([report](examples/real-device/exploration.md)) |
 | Replay the agent-generated regression test on the device | passed ([test](examples/real-device/test_generated_apidemos.py), [run](examples/real-device/generated-test-run.txt)) |
 
 The first real run caught a bug the simulator could not: Android renders button text in ALL CAPS, so the generated test's case-sensitive success check failed. Generated tests now match success text the way the agent does, ignoring case.
 
-## How the exploratory agent works
+How the exploratory agent works:
 
 ```text
-page source ─▶ compact element list ─▶ checks: crash? error text? unlabeled controls? goal reached?
-     ▲                                                  │
-     │                                                  ▼
- execute with a stable Appium locator  ◀── model picks the next action (tap / type / back / give up)
-     │
-     └─▶ step recorded: action, element, locator, reason
+page source -> compact element list -> checks: crash? error text? unlabeled controls? goal reached?
+     ^                                                  |
+     |                                                  v
+ execute with a stable Appium locator  <- model picks the next action (tap / type / back / give up)
+     |
+     └-> step recorded: action, element, locator, reason
 ```
 
-- **The model sees elements, not XML.** Each screen becomes lines like `[4] Button text="Add to cart" a11y="Add Wireless Earbuds to cart" tappable`. Same format for Android (UiAutomator2) and iOS (XCUITest).
-- **Locators are chosen in code, not by the model:** accessibility id first, then resource id / iOS name, then visible text. The model only says *which* element; the agent decides *how* to find it, so generated tests use the same locators a senior engineer would.
-- **Guard rails:** invalid indexes are ignored, repeated screens end the run as `STUCK`, and `max_steps` caps cost.
-- **Passwords never leak.** Repro steps show `<password>` and generated tests read `TEST_PASSWORD` from the environment.
+- The model sees elements, not XML. Each screen becomes lines like `[4] Button text="Add to cart" a11y="Add Wireless Earbuds to cart" tappable`. Same format for Android (UiAutomator2) and iOS (XCUITest).
+- Locators are chosen in code, not by the model: accessibility id first, then resource id / iOS name, then visible text. The model only says which element; the agent decides how to find it, so generated tests use the same locators a senior engineer would.
+- Guard rails: invalid indexes are ignored, repeated screens end the run as `STUCK`, and `max_steps` caps cost.
+- Passwords never leak. Repro steps show `<password>` and generated tests read `TEST_PASSWORD` from the environment.
 
-## How self-healing works
+How self-healing works:
 
 ```python
 from appium.webdriver.common.appiumby import AppiumBy
@@ -64,13 +79,17 @@ healer.find(AppiumBy.ID, "com.shoplite:id/signin_button", "Sign in button on the
 1. Try the original locator.
 2. If it is gone, send the current screen's elements and the description to the model.
 3. Build a stable locator for the element it picks, verify it resolves, and continue.
-4. Append the heal to `reports/healing-report.jsonl` (`broken` → `healed`), so the test code gets fixed instead of silently drifting.
+4. Append the heal to `reports/healing-report.jsonl` (`broken` to `healed`), so the test code gets fixed instead of silently drifting.
 
 `mobile-agent heal-demo` shows this on the simulated app, whose v2 build renamed `signin_button` to `submit_signin`.
 
-## Run it without a device
+## Prerequisites
 
-The tests use `SimulatedShopLite`, a small in-process Android app whose page sources match what UiAutomator2 returns. It has three seeded defects: a renamed button id, a cart icon with no accessibility label, and a checkout failure when a promo code is applied.
+A Python environment that can run the quick start commands below. For a real emulator or device, also: an Appium server, the Android UiAutomator2 driver, and for iOS, macOS + Xcode with the XCUITest driver, as in Run it on a real emulator or device below. No version numbers beyond those stated in the original README are claimed here.
+
+## Quick start
+
+Run it without a device. The tests use `SimulatedShopLite`, a small in-process Android app whose page sources match what UiAutomator2 returns. It has three seeded defects: a renamed button id, a cart icon with no accessibility label, and a checkout failure when a promo code is applied.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -81,7 +100,9 @@ mobile-agent heal-demo
 
 Use a real model with `LLM_PROVIDER=anthropic` (or `openai`) and an API key; see `.env.example`.
 
-## Run it on a real emulator or device
+## Usage
+
+Run it on a real emulator or device:
 
 ```bash
 npm install -g appium
@@ -93,6 +114,13 @@ appium &
 mobile-agent explore --app device --caps caps/android-emulator.json \
   --goal "Sign in and open order history" --data '{"email": "...", "password": "..."}' --success-text "Order history"
 
+APPIUM_SERVER=http://127.0.0.1:4723 pytest tests_device      # device tests are skipped otherwise
+```
+
+## Testing
+
+```bash
+pytest -q                 # 16 tests, offline, mock model
 APPIUM_SERVER=http://127.0.0.1:4723 pytest tests_device      # device tests are skipped otherwise
 ```
 
@@ -116,6 +144,10 @@ CI runs the offline suite on every push. A second workflow, **Real Android emula
 
 Python · Appium 2 (UiAutomator2, XCUITest) · Appium Python Client · LLM APIs (Anthropic, OpenAI) · pytest · GitHub Actions
 
+## Run with a real model and on a real emulator in CI
+
+Use a real model with `LLM_PROVIDER=anthropic` (or `openai`) and an API key; see `.env.example`. For CI, the **Real Android emulator** workflow (`.github/workflows/real-device.yml`) boots an Android 11 emulator, installs ApiDemos, and runs `tests_device` as described in Testing above. No repository secret name for a real model is stated in the original README, so none is claimed here.
+
 ## License
 
-MIT
+MIT, Copyright (c) 2026 Harika Modali.
